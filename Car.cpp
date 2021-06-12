@@ -2,10 +2,26 @@
 #include <algorithm>
 #include <iostream>
 #include <math.h>
+#include <armadillo>
+#include "include/box2d/box2d.h"
+
+
+using namespace std;
 
 double deg2rad(double deg) {
     return deg * M_PI / 180.0;
 }
+
+sf::Vector2f operator*(const sf::Vector2f& vec, const sf::Vector2f& v2) {
+    return sf::Vector2f(vec.x*v2.x, vec.y*v2.y);
+}
+sf::Vector2f operator/(const sf::Vector2f& vec, const sf::Vector2f& v2) {
+    return sf::Vector2f(vec.x/v2.x, vec.y/v2.y);
+}
+sf::Vector2f operator/(const sf::Vector2f& vec, float f) {
+    return sf::Vector2f(vec.x/f, vec.y/f);
+}
+
 
 Car::Car(int x = 400, int y = 400) {
     body.setPosition(400, 400);
@@ -19,15 +35,51 @@ Car::Car(int x = 400, int y = 400) {
         wheel->setOrigin(5.0f, 10.0f);
     }
 }
+
+float sum(sf::Vector2f vec) {
+    return vec.x+vec.y;
+}
+
+float mag(sf::Vector2f vec) {
+    return sqrt(vec.x*vec.x + vec.y*vec.y);
+}
+sf::Vector2f norm(sf::Vector2f vec) {
+    return vec / mag(vec);
+}
+
+
+sf::Vector2f Car::drag() {
+    return -0.1f * mag(vel) * vel;
+}
+float Car::getSpeed() {
+    return mag(vel);
+}
+
+float component(sf::Vector2f vec) {
+
+}
+
 void Car::update() {
     //std::cout << "angle " << wheelAngle << " sin " << sin(wheelAngle) << std::endl;
-    sf::Vector2f delta = throttle * sf::Vector2f(-sin(deg2rad(wheelAngle)), cos(deg2rad(wheelAngle)));
-    body.setPosition(body.getPosition() + delta);
+    dir.x = -sin(deg2rad(wheelAngle));
+    dir.y = cos(deg2rad(wheelAngle));
 
-    wheel1.setRotation(wheelAngle);
+    //sf::Vector2f delta = throttle * sf::Vector2f(-sin(deg2rad(wheelAngle)), cos(deg2rad(wheelAngle)));
+    acc = throttle*dir + drag();
+    vel += acc * dt ;
+    vel *= linearDamping;
+
+
+    float R = 60 / sin(wheelAngle);
+    angVel = -30*mag(vel) / R;
+
+    body.setPosition(body.getPosition() + vel);
+    body.setRotation(body.getRotation() + angVel);
+
+    wheel1.setRotation(body.getRotation() + wheelAngle);
     wheel1.setPosition(body.getPosition() + sf::Vector2f(-20, -30));
 
-    wheel2.setRotation(wheelAngle);
+    wheel2.setRotation(body.getRotation() + wheelAngle);
     wheel2.setPosition(body.getPosition() + sf::Vector2f(20, -30));
 
     wheel3.setPosition(body.getPosition() + sf::Vector2f(-20, 30));
