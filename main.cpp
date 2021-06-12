@@ -2,10 +2,11 @@
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include <iostream>
-#include <thread>
 #include <string>
+#include <thread>
 
-#include "Car.h"
+//#include "Car.h"
+#include "Simulator.h"
 
 using namespace std::chrono_literals;  // ns, us, ms, s, h, etc.
 using namespace std;
@@ -13,25 +14,19 @@ const int H = 1000, W = 1000;
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(H, W), "Car simulator");
-    Car car = Car(200, 200);
     sf::Font font;
     font.loadFromFile("/usr/share/fonts/truetype/msttcorefonts/arial.ttf");
     sf::Text text;
-    // select the font
-    text.setFont(font); // font is a sf::Font
-    // set the string to display
+    text.setFont(font);
     text.setString("Hello world");
-    // set the character size
-    text.setCharacterSize(24); // in pixels, not points!
-    // set the color
+    text.setCharacterSize(24);
     text.setFillColor(sf::Color::Red);
-    // set the text style
     text.setStyle(sf::Text::Bold | sf::Text::Underlined);
-
+    Simulator sim;
+    int controlState = 0;
 
     while (window.isOpen()) {
         sf::Event event;
-        car.throttle = 0.0;
 
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed ||
@@ -39,25 +34,26 @@ int main() {
                  event.key.code == sf::Keyboard::Escape))
                 window.close();
         }
+        //car.throttle = 0.0;
+        controlState = 0;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-            car.turn(-0.1);
+            controlState |= TDC_LEFT;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-            car.turn(0.1);
+            controlState |= TDC_RIGHT;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-            car.throttle = -1.0;
+            controlState |= TDC_UP;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-            car.throttle = 1.0;
+            controlState |= TDC_DOWN;
         }
-
         window.clear();
-        car.update();
-        car.draw(window);
-        text.setString(to_string(car.getSpeed()));
+        sim.step(controlState, window);
+        //car.update();
+        //car.draw(window);
+        //text.setString(to_string(car.getSpeed()));
         window.draw(text);
         window.display();
         this_thread::sleep_for(10ms);
     }
-
     return 0;
 }

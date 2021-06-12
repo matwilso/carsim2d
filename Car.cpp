@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <iostream>
 #include <math.h>
-#include <armadillo>
 #include "include/box2d/box2d.h"
 
 
