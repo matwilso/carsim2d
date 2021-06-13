@@ -15,9 +15,10 @@ class Simulator {
     void applyFriction();
 
     ~Simulator();
-    void step(int controlState, sf::RenderWindow&);
+    void step(int controlState, sf::RenderWindow*);
     b2World* world;
     float dt = 0.01;
     Car* car;
+    b2Body* edge;
     //unique_ptr<Car> car;
 };

@@ -17,34 +17,76 @@ Simulator::Simulator() {
     world = new b2World(gravity);
     //car = unique_ptr<Car>(new Car(world));
     car = new Car(world);
+    b2EdgeShape edgeShape;
+
+    b2BodyDef bodyDef;
+    edge = world->CreateBody(&bodyDef);
+    edgeShape.SetTwoSided(b2Vec2(100.0f, -100.0f), b2Vec2(100.0f, -200.0f));
+    edge->CreateFixture(&edgeShape, 1.0);
+    edgeShape.SetTwoSided(b2Vec2(50.0f, -100.0f), b2Vec2(100.0f, -100.0f));
+    edge->CreateFixture(&edgeShape, 1.0);
+    //edgeShape.SetTwoSided(b2Vec2(0.0f, 0.0f), b2Vec2(100.0f, -0100.0f));
+    //edge->CreateFixture(&edgeShape, 1.0);
 }
 
-void renderShape(b2Body* body, sf::RenderWindow& window, sf::Color color = sf::Color(100,250,50)) {
-    auto fix = body->GetFixtureList()[0];
-    if (auto shape = dynamic_cast<b2PolygonShape*>(fix.GetShape())) {
-        auto trans = fix.GetBody()->GetTransform();
+void renderFixture(b2Fixture* fix, sf::RenderWindow* window, sf::Color color = sf::Color(100, 250, 50)) {
+    if (auto shape = dynamic_cast<b2PolygonShape*>(fix->GetShape())) {
+        auto trans = fix->GetBody()->GetTransform();
         sf::ConvexShape convex;
         int n = shape->m_count;
         convex.setPointCount(n);
         for (auto i = 0; i < n; i++) {
-            auto vert = body->GetWorldPoint(shape->m_vertices[i]);
-            sf::Vector2f arr(100 + 5.0 * vert.x, 100 - 5.0 * vert.y);
-            cout << "i " << i << " " << arr.x << " " << arr.y << endl;
+            auto vert = fix->GetBody()->GetWorldPoint(shape->m_vertices[i]);
+            sf::Vector2f arr(5.0 * vert.x, -5.0 * vert.y);
+            //cout << "i " << i << " " << vert.x << " " << vert.y << endl;
+            //cout << "i " << i << " " << arr.x << " " << arr.y << endl;
             convex.setPoint(i, arr);
         }
         convex.setFillColor(color);
-        window.draw(convex);
+        window->draw(convex);
+    } else if (auto shape = dynamic_cast<b2EdgeShape*>(fix->GetShape())) {
+        //cout << "LINE" << endl;
+        /// TODO: go through the effort of adding thickness to this.
+        auto trans = fix->GetBody()->GetTransform();
+        sf::Vertex line[] =
+            {
+                sf::Vertex(sf::Vector2f(5.0 * shape->m_vertex1.x, -5.0 * shape->m_vertex1.y), color),
+                sf::Vertex(sf::Vector2f(5.0 * shape->m_vertex2.x, -5.0 * shape->m_vertex2.y), color),
+            };
+        window->draw(line, 2, sf::Lines);
     }
-    //else if (auto shape = dynamic_cast<b2PolygonShape*>(fix.GetShape())) { }
 }
 
-void Simulator::step(int controlState, sf::RenderWindow& window) {
+void renderShape(b2Body* body, sf::RenderWindow* window, sf::Color color = sf::Color(100, 250, 50)) {
+    auto fix = body->GetFixtureList();
+    for (b2Fixture* fix = body->GetFixtureList(); fix; fix = fix->GetNext())
+        renderFixture(fix, window, color);
+}
+
+void Simulator::step(int controlState, sf::RenderWindow* window) {
     car->update(controlState);
     world->Step(dt, 10, 10);
+    class RayCallback : public b2RayCastCallback {
+       public:
+        sf::RenderWindow* window;
+        RayCallback(sf::RenderWindow* window_) {
+            window = window_;
+        }
+
+        float ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float fraction) override {
+            cout << "fixture" << fraction << endl;
+            renderFixture(fixture, window);
+            return 1;
+        }
+    };
+    RayCallback cb(window);
+
+    renderShape(edge, window);
     renderShape(car->body, window, sf::Color(155, 0, 0));
     for (auto wheel : car->wheels) {
         renderShape(wheel->body, window);
     }
+    world->RayCast(&cb, b2Vec2(0.0f, 0.0f), b2Vec2(100.0f, -100.0f));
 }
 
 Simulator::~Simulator() {

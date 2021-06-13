@@ -78,6 +78,7 @@ Car::Car(b2World* world) {
 }
 
 Car::~Car() {
+    body->GetWorld()->DestroyBody(body);
     for (int i = 0; i < wheels.size(); i++)
         delete wheels[i];
 }
