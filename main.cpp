@@ -7,6 +7,7 @@
 
 //#include "Car.h"
 #include "Simulator.h"
+#include "Constants.h"
 
 using namespace std::chrono_literals;  // ns, us, ms, s, h, etc.
 using namespace std;
@@ -46,7 +47,7 @@ int main() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
             controlState |= TDC_DOWN;
         }
-        window.clear();
+        window.clear(sf::Color::White);
         sim.step(controlState, window);
         //car.update();
         //car.draw(window);

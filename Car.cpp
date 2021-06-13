@@ -1,97 +1,111 @@
 #include "Car.h"
+
+#include <math.h>
+
 #include <algorithm>
 #include <iostream>
-#include <math.h>
+
+#include "Constants.h"
 #include "include/box2d/box2d.h"
-
-
 using namespace std;
 
-double deg2rad(double deg) {
-    return deg * M_PI / 180.0;
+Car::Car(b2World* world) {
+    //create car body
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_dynamicBody;
+    body = world->CreateBody(&bodyDef);
+    body->SetAngularDamping(3);
+
+    b2Vec2 vertices[8];
+    vertices[0].Set(1.5, 0);
+    vertices[1].Set(3, 2.5);
+    vertices[2].Set(2.8, 5.5);
+    vertices[3].Set(1, 10);
+    vertices[4].Set(-1, 10);
+    vertices[5].Set(-2.8, 5.5);
+    vertices[6].Set(-3, 2.5);
+    vertices[7].Set(-1.5, 0);
+    b2PolygonShape polygonShape;
+    polygonShape.Set(vertices, 8);
+    b2Fixture* fixture = body->CreateFixture(&polygonShape, 0.1f);  //shape, density
+
+    //prepare common joint parameters
+    b2RevoluteJointDef jointDef;
+    jointDef.bodyA = body;
+    jointDef.enableLimit = true;
+    jointDef.lowerAngle = 0;
+    jointDef.upperAngle = 0;
+    jointDef.localAnchorB.SetZero();  //center of tire
+
+    float maxForwardSpeed = 250;
+    float maxBackwardSpeed = -40;
+    float backTireMaxDriveForce = 300;
+    float frontTireMaxDriveForce = 500;
+    float backTireMaxLateralImpulse = 8.5;
+    float frontTireMaxLateralImpulse = 7.5;
+
+    //back left tire
+    Wheel* tire = new Wheel(world);
+    tire->setCharacteristics(maxForwardSpeed, maxBackwardSpeed, backTireMaxDriveForce, backTireMaxLateralImpulse);
+    jointDef.bodyB = tire->body;
+    jointDef.localAnchorA.Set(-3, 0.75f);
+    world->CreateJoint(&jointDef);
+    wheels.push_back(tire);
+
+    //back right tire
+    tire = new Wheel(world);
+    tire->setCharacteristics(maxForwardSpeed, maxBackwardSpeed, backTireMaxDriveForce, backTireMaxLateralImpulse);
+    jointDef.bodyB = tire->body;
+    jointDef.localAnchorA.Set(3, 0.75f);
+    world->CreateJoint(&jointDef);
+    wheels.push_back(tire);
+
+    //front left tire
+    tire = new Wheel(world);
+    tire->setCharacteristics(maxForwardSpeed, maxBackwardSpeed, frontTireMaxDriveForce, frontTireMaxLateralImpulse);
+    jointDef.bodyB = tire->body;
+    jointDef.localAnchorA.Set(-3, 8.5f);
+    flJoint = (b2RevoluteJoint*)world->CreateJoint(&jointDef);
+    wheels.push_back(tire);
+
+    //front right tire
+    tire = new Wheel(world);
+    tire->setCharacteristics(maxForwardSpeed, maxBackwardSpeed, frontTireMaxDriveForce, frontTireMaxLateralImpulse);
+    jointDef.bodyB = tire->body;
+    jointDef.localAnchorA.Set(3, 8.5f);
+    frJoint = (b2RevoluteJoint*)world->CreateJoint(&jointDef);
+    wheels.push_back(tire);
 }
 
-sf::Vector2f operator*(const sf::Vector2f& vec, const sf::Vector2f& v2) {
-    return sf::Vector2f(vec.x*v2.x, vec.y*v2.y);
-}
-sf::Vector2f operator/(const sf::Vector2f& vec, const sf::Vector2f& v2) {
-    return sf::Vector2f(vec.x/v2.x, vec.y/v2.y);
-}
-sf::Vector2f operator/(const sf::Vector2f& vec, float f) {
-    return sf::Vector2f(vec.x/f, vec.y/f);
+Car::~Car() {
+    for (int i = 0; i < wheels.size(); i++)
+        delete wheels[i];
 }
 
+void Car::update(int controlState) {
+    for (int i = 0; i < wheels.size(); i++)
+        wheels[i]->updateFriction();
+    for (int i = 0; i < wheels.size(); i++)
+        wheels[i]->updateDrive(controlState);
 
-Car::Car(int x = 400, int y = 400) {
-    body.setPosition(400, 400);
-    body.setOrigin(25.0f, 50.0f);
-    body.setFillColor(sf::Color::Green);
-    for (auto& wheel : wheels) {
-        wheel->setFillColor(sf::Color::Red);
-        wheel->setFillColor(sf::Color::Red);
-        wheel->setFillColor(sf::Color::Red);
-        wheel->setFillColor(sf::Color::Red);
-        wheel->setOrigin(5.0f, 10.0f);
+    //control steering
+    float lockAngle = 35 * DEGTORAD;
+    float turnSpeedPerSec = 160 * DEGTORAD;  //from lock to lock in 0.5 sec
+    float turnPerTimeStep = turnSpeedPerSec / 60.0f;
+    float desiredAngle = 0;
+    switch (controlState & (TDC_LEFT | TDC_RIGHT)) {
+        case TDC_LEFT:
+            desiredAngle = lockAngle;
+            break;
+        case TDC_RIGHT:
+            desiredAngle = -lockAngle;
+            break;
+        default:;  //nothing
     }
+    float angleNow = flJoint->GetJointAngle();
+    float angleToTurn = desiredAngle - angleNow;
+    angleToTurn = b2Clamp(angleToTurn, -turnPerTimeStep, turnPerTimeStep);
+    float newAngle = angleNow + angleToTurn;
+    flJoint->SetLimits(newAngle, newAngle);
+    frJoint->SetLimits(newAngle, newAngle);
 }
-
-float sum(sf::Vector2f vec) {
-    return vec.x+vec.y;
-}
-
-float mag(sf::Vector2f vec) {
-    return sqrt(vec.x*vec.x + vec.y*vec.y);
-}
-sf::Vector2f norm(sf::Vector2f vec) {
-    return vec / mag(vec);
-}
-
-
-sf::Vector2f Car::drag() {
-    return -0.1f * mag(vel) * vel;
-}
-float Car::getSpeed() {
-    return mag(vel);
-}
-
-float component(sf::Vector2f vec) {
-
-}
-
-void Car::update() {
-    //std::cout << "angle " << wheelAngle << " sin " << sin(wheelAngle) << std::endl;
-    dir.x = -sin(deg2rad(wheelAngle));
-    dir.y = cos(deg2rad(wheelAngle));
-
-    //sf::Vector2f delta = throttle * sf::Vector2f(-sin(deg2rad(wheelAngle)), cos(deg2rad(wheelAngle)));
-    acc = throttle*dir + drag();
-    vel += acc * dt ;
-    vel *= linearDamping;
-
-
-    float R = 60 / sin(wheelAngle);
-    angVel = -30*mag(vel) / R;
-
-    body.setPosition(body.getPosition() + vel);
-    body.setRotation(body.getRotation() + angVel);
-
-    wheel1.setRotation(body.getRotation() + wheelAngle);
-    wheel1.setPosition(body.getPosition() + sf::Vector2f(-20, -30));
-
-    wheel2.setRotation(body.getRotation() + wheelAngle);
-    wheel2.setPosition(body.getPosition() + sf::Vector2f(20, -30));
-
-    wheel3.setPosition(body.getPosition() + sf::Vector2f(-20, 30));
-
-    wheel4.setPosition(body.getPosition() + sf::Vector2f(20, 30));
-}
-
-void Car::draw(sf::RenderWindow& window) {
-    for (auto& shape : shapes) {
-        window.draw(*shape);
-    }
-}
-
-void Car::turn(float dir) {
-    wheelAngle = std::clamp<float>(wheelAngle + 10 * dir, -50.0, 50.0);
-};
