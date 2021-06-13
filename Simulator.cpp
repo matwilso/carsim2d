@@ -46,7 +46,30 @@ void shape(b2Body* body, sf::RenderWindow* window, sf::Color color = sf::Color(1
     for (b2Fixture* fix = body->GetFixtureList(); fix; fix = fix->GetNext())
         fixture(fix, window, color);
 }
+void camera(Camera* camera, sf::RenderWindow* window, sf::Color color = sf::Color(100, 250, 50)) {
+    // create an array of 3 vertices that define a triangle primitive
+    sf::VertexArray triangle(sf::Quads, 4);
+    // define the position of the triangle's points
 
+    auto t = camera->body->GetTransform().q;
+    auto start = camera->body->GetWorldPoint(b2Vec2(0.0, 0.0));
+    //auto start = camera->body->GetWorldPoint(camera->offset);
+    auto e1 = start + 1.0 * camera->range * b2Vec2(-sin(camera->body->GetAngle() + camera->angle + camera->fov / 2), cos(camera->body->GetAngle() + camera->angle + camera->fov / 2));
+    auto e2 = start + 1.0 * camera->range * b2Vec2(-sin(camera->body->GetAngle() + camera->angle), cos(camera->body->GetAngle() + camera->angle));
+    auto e3 = start + 1.0 * camera->range * b2Vec2(-sin(camera->body->GetAngle() + camera->angle - camera->fov / 2), cos(camera->body->GetAngle() + camera->angle - camera->fov / 2));
+
+    triangle[0].position = sf::Vector2f(5.0 * start.x, -5.0 * start.y);
+    triangle[1].position = sf::Vector2f(5.0 * e1.x, -5.0 * e1.y);
+    triangle[2].position = sf::Vector2f(5.0 * e2.x, -5.0 * e2.y);
+    triangle[3].position = sf::Vector2f(5.0 * e3.x, -5.0 * e3.y);
+
+    // define the color of the triangle's points
+    triangle[0].color = sf::Color(100, 250, 50, 30);
+    triangle[1].color = sf::Color(100, 250, 50, 30);
+    triangle[2].color = sf::Color(100, 250, 50, 30);
+    triangle[3].color = sf::Color(100, 250, 50, 30);
+    window->draw(triangle);
+}
 }  // namespace render
 
 Simulator::Simulator() {
@@ -58,43 +81,33 @@ Simulator::Simulator() {
 
     b2BodyDef bodyDef;
     edge = world->CreateBody(&bodyDef);
-    edgeShape.SetTwoSided(b2Vec2(100.0f, -100.0f), b2Vec2(100.0f, -200.0f));
+    edgeShape.SetTwoSided(b2Vec2(100.0f, -125.0f), b2Vec2(100.0f, -200.0f));
     edge->CreateFixture(&edgeShape, 1.0);
-    edgeShape.SetTwoSided(b2Vec2(50.0f, -100.0f), b2Vec2(100.0f, -100.0f));
+    edgeShape.SetTwoSided(b2Vec2(50.0f, -125.0f), b2Vec2(100.0f, -125.0f));
     edge->CreateFixture(&edgeShape, 1.0);
     //edgeShape.SetTwoSided(b2Vec2(0.0f, 0.0f), b2Vec2(100.0f, -0100.0f));
     //edge->CreateFixture(&edgeShape, 1.0);
+    frontCam = new Camera("front"s, car->body, b2Vec2(0, 10.0f), 0.0);
+    //rightCam = new Camera("right"s, car->body, b2Vec2(0, 0), 1.5707);
+    //camera = Camera(car->body, b2Vec2(0, 0), 0.0);
 }
 
 void Simulator::step(int controlState, sf::RenderWindow* window) {
     car->update(controlState);
     world->Step(dt, 10, 10);
-    class RayCallback : public b2RayCastCallback {
-       public:
-        sf::RenderWindow* window;
-        RayCallback(sf::RenderWindow* window_) {
-            window = window_;
-        }
-
-        float ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float fraction) override {
-            cout << "fixture" << fraction << endl;
-            render::fixture(fixture, window);
-            return 1;
-        }
-    };
-    RayCallback cb(window);
 
     render::shape(edge, window);
     render::shape(car->body, window, sf::Color(155, 0, 0));
     for (auto wheel : car->wheels) {
         render::shape(wheel->body, window);
     }
-    auto x = camera.capture();
+    render::camera(frontCam, window);
+    //rightCam->capture();
+    auto x = frontCam->capture(window);
     sf::Sprite sprite;
     sprite.setTexture(x.first);
-    sprite.setPosition(100, 100);
+    sprite.setPosition(800, 10);
     window->draw(sprite);
-    world->RayCast(&cb, b2Vec2(0.0f, 0.0f), b2Vec2(100.0f, -100.0f));
 }
 
 Simulator::~Simulator() {

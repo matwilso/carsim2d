@@ -5,9 +5,31 @@ Simple top-down 2D car simulator made in C++ using box2D for physics and SFML fo
 This project is to dust off my C++ knowledge and get practice developing a Software 1.0 simulator to better understand it
 (the [Chestertons's Fence](https://wiki.lesswrong.com/wiki/Chesterton%27s_Fence)).
 
-It is pretty barebones and not that interesting right now, so don't get that excited.
+It is pretty barebones, so don't get that excited.
 
+## Description
+
+TODO: add video and briefly describe the system.
+
+
+## Install
+
+This repo only supports ubuntu. I precompiled box2d as a static library and included it here.
+
+To install SFML:
+`sudo apt-get install libsfml-dev`
+
+The scripts `compile.sh` and `run.sh` show how to compile things.
 
 ## References
 
-Followed this for the car physics: http://www.iforce2d.net/b2dtut/top-down-car
+For the initial car physics: http://www.iforce2d.net/b2dtut/top-down-car
+
+The 1D image and depth observation idea is based on: https://andyljones.com/megastep/
+
+
+## TODO
+
+- road maker / scene generator tools
+- other moving agents
+- varying lighting
