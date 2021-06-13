@@ -1,4 +1,4 @@
-# car_simulator
+# carsim2d
 
 Simple top-down 2D car simulator made in C++ using box2D for physics and SFML for rendering.
 

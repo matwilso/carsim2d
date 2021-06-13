@@ -47,8 +47,8 @@ int main() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
             controlState |= TDC_DOWN;
         }
-        window.clear();
-        //window.clear(sf::Color::White);
+        //window.clear();
+        window.clear(sf::Color::White);
         sim.step(controlState, &window);
         //car.update();
         //car.draw(window);

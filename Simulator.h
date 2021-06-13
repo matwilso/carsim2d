@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "Car.h"
+#include "Camera.h"
 #include "include/box2d/box2d.h"
 
 class Simulator {
@@ -19,6 +20,7 @@ class Simulator {
     b2World* world;
     float dt = 0.01;
     Car* car;
+    Camera camera;
     b2Body* edge;
     //unique_ptr<Car> car;
 };

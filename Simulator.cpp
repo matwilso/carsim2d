@@ -12,24 +12,8 @@
 
 using namespace std;
 
-Simulator::Simulator() {
-    b2Vec2 gravity(0.0f, 0.0f);
-    world = new b2World(gravity);
-    //car = unique_ptr<Car>(new Car(world));
-    car = new Car(world);
-    b2EdgeShape edgeShape;
-
-    b2BodyDef bodyDef;
-    edge = world->CreateBody(&bodyDef);
-    edgeShape.SetTwoSided(b2Vec2(100.0f, -100.0f), b2Vec2(100.0f, -200.0f));
-    edge->CreateFixture(&edgeShape, 1.0);
-    edgeShape.SetTwoSided(b2Vec2(50.0f, -100.0f), b2Vec2(100.0f, -100.0f));
-    edge->CreateFixture(&edgeShape, 1.0);
-    //edgeShape.SetTwoSided(b2Vec2(0.0f, 0.0f), b2Vec2(100.0f, -0100.0f));
-    //edge->CreateFixture(&edgeShape, 1.0);
-}
-
-void renderFixture(b2Fixture* fix, sf::RenderWindow* window, sf::Color color = sf::Color(100, 250, 50)) {
+namespace render {
+void fixture(b2Fixture* fix, sf::RenderWindow* window, sf::Color color = sf::Color(100, 250, 50)) {
     if (auto shape = dynamic_cast<b2PolygonShape*>(fix->GetShape())) {
         auto trans = fix->GetBody()->GetTransform();
         sf::ConvexShape convex;
@@ -57,10 +41,29 @@ void renderFixture(b2Fixture* fix, sf::RenderWindow* window, sf::Color color = s
     }
 }
 
-void renderShape(b2Body* body, sf::RenderWindow* window, sf::Color color = sf::Color(100, 250, 50)) {
+void shape(b2Body* body, sf::RenderWindow* window, sf::Color color = sf::Color(100, 250, 50)) {
     auto fix = body->GetFixtureList();
     for (b2Fixture* fix = body->GetFixtureList(); fix; fix = fix->GetNext())
-        renderFixture(fix, window, color);
+        fixture(fix, window, color);
+}
+
+}  // namespace render
+
+Simulator::Simulator() {
+    b2Vec2 gravity(0.0f, 0.0f);
+    world = new b2World(gravity);
+    //car = unique_ptr<Car>(new Car(world));
+    car = new Car(world);
+    b2EdgeShape edgeShape;
+
+    b2BodyDef bodyDef;
+    edge = world->CreateBody(&bodyDef);
+    edgeShape.SetTwoSided(b2Vec2(100.0f, -100.0f), b2Vec2(100.0f, -200.0f));
+    edge->CreateFixture(&edgeShape, 1.0);
+    edgeShape.SetTwoSided(b2Vec2(50.0f, -100.0f), b2Vec2(100.0f, -100.0f));
+    edge->CreateFixture(&edgeShape, 1.0);
+    //edgeShape.SetTwoSided(b2Vec2(0.0f, 0.0f), b2Vec2(100.0f, -0100.0f));
+    //edge->CreateFixture(&edgeShape, 1.0);
 }
 
 void Simulator::step(int controlState, sf::RenderWindow* window) {
@@ -75,17 +78,22 @@ void Simulator::step(int controlState, sf::RenderWindow* window) {
 
         float ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float fraction) override {
             cout << "fixture" << fraction << endl;
-            renderFixture(fixture, window);
+            render::fixture(fixture, window);
             return 1;
         }
     };
     RayCallback cb(window);
 
-    renderShape(edge, window);
-    renderShape(car->body, window, sf::Color(155, 0, 0));
+    render::shape(edge, window);
+    render::shape(car->body, window, sf::Color(155, 0, 0));
     for (auto wheel : car->wheels) {
-        renderShape(wheel->body, window);
+        render::shape(wheel->body, window);
     }
+    auto x = camera.capture();
+    sf::Sprite sprite;
+    sprite.setTexture(x.first);
+    sprite.setPosition(100, 100);
+    window->draw(sprite);
     world->RayCast(&cb, b2Vec2(0.0f, 0.0f), b2Vec2(100.0f, -100.0f));
 }
 
