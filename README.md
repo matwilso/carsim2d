@@ -7,7 +7,12 @@ This project is to dust off my C++ knowledge and get practice developing a Softw
 
 It is pretty barebones, so don't get that excited.
 
-(TODO: video)
+
+
+https://user-images.githubusercontent.com/19582683/121851669-a08cfb80-ccab-11eb-936e-574c7e46ab01.mp4
+
+
+
 
 ## Install
 
@@ -23,6 +28,7 @@ The scripts `compile.sh` and `run.sh` show how to compile things.
 For the initial car physics: http://www.iforce2d.net/b2dtut/top-down-car
 
 The rendering idea is loosely based off: https://andyljones.com/megastep/
+
 
 
 ## TODO
