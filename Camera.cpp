@@ -15,9 +15,7 @@ using namespace std;
 
 Camera::Camera(string name, b2Body* body, b2Vec2 offset, float angle) {
     rgbTexture.create(imageWidth, imageHeight);
-    depthTexture.create(imageWidth, imageHeight);
     rgbPixels = new sf::Uint8[totalSize()];
-    depthPixels = new sf::Uint8[totalSize()];
     this->name = name;
     this->body = body;
     this->offset = offset;
@@ -41,36 +39,28 @@ class RayCallback : public b2RayCastCallback {
         for (auto i = 0; i < 64; i++) {
             rgbBuffer[i] = sf::Color::Black;
         }
-        //fill_n(rgbBuffer, 64, 255);
         this->name = name;
         this->window = window;
     }
     float ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float fraction) override {
-        if (true) {
-            //if (fraction > 0.1) {
-            sf::Vertex line[] =
-                {
-                    sf::Vertex(sf::Vector2f(5 * start.x, -5 * start.y), sf::Color::Red),
-                    sf::Vertex(sf::Vector2f(5 * point.x, -5 * point.y), sf::Color::Red),
-                };
-            window->draw(line, 2, sf::Lines);
-            depthBuffer[idx] = sf::Uint8(255 - round(255 * fraction));
-            auto ud = (FixtureUserData*)fixture->GetUserData().pointer;
-            rgbBuffer[idx] = ud->color;
-            sf::CircleShape shape(5.f);
-            shape.setFillColor(sf::Color::Red);
-            shape.setPosition(5 * point.x, -5 * point.y);
-            window->draw(shape);
-            //cout << name << " fixture " << fraction << endl;
-            return -1;
-        } else {
-            //depthBuffer[idx] = sf::Uint8(0);
-            return -1;
-        }
+        sf::Vertex line[] =
+            {
+                sf::Vertex(sf::Vector2f(5 * start.x, -5 * start.y), sf::Color::Red),
+                sf::Vertex(sf::Vector2f(5 * point.x, -5 * point.y), sf::Color::Red),
+            };
+        window->draw(line, 2, sf::Lines);
+        depthBuffer[idx] = sf::Uint8(255 - round(255 * fraction));
+        auto ud = (FixtureUserData*)fixture->GetUserData().pointer;
+        rgbBuffer[idx] = ud->color;
+        sf::CircleShape shape(5.f);
+        shape.setFillColor(sf::Color::Red);
+        shape.setPosition(5 * point.x, -5 * point.y);
+        window->draw(shape);
+        return -1;
     }
 };
 
-pair<sf::Texture, sf::Texture> Camera::capture(sf::RenderWindow* window) {
+sf::Texture Camera::capture(sf::RenderWindow* window) {
     RayCallback cb(name, window);
     auto t = body->GetTransform().q;
 
@@ -91,29 +81,15 @@ pair<sf::Texture, sf::Texture> Camera::capture(sf::RenderWindow* window) {
     for (auto h = 0; h < imageHeight; h++) {
         for (auto w = 0; w < imageWidth; w++) {
             auto i = h * imageWidth * 4 + w * 4;
-            depthPixels[i] = cb.depthBuffer[w / upsize];
-            depthPixels[i + 1] = cb.depthBuffer[w / upsize];
-            depthPixels[i + 2] = cb.depthBuffer[w / upsize];
-            depthPixels[i + 3] = 255;
-        }
-    }
-    for (auto h = 0; h < imageHeight; h++) {
-        for (auto w = 0; w < imageWidth; w++) {
-            auto i = h * imageWidth * 4 + w * 4;
             auto col = cb.rgbBuffer[w / upsize];
             int depth = cb.depthBuffer[w / upsize];
-            //cout << depth << endl;
             rgbPixels[i] = round((depth / 255.0f) * col.r);
             rgbPixels[i + 1] = round((depth / 255.0f) * col.g);
             rgbPixels[i + 2] = round((depth / 255.0f) * col.b);
-            //rgbPixels[i] = col.r;
-            //rgbPixels[i + 1] = col.g;
-            //rgbPixels[i + 2] = col.b;
             rgbPixels[i + 3] = 255;
         }
     }
 
     rgbTexture.update(rgbPixels, imageWidth, imageHeight, 0, 0);
-    depthTexture.update(depthPixels, imageWidth, imageHeight, 0, 0);
-    return pair<sf::Texture, sf::Texture>(rgbTexture, depthTexture);
+    return rgbTexture;
 }

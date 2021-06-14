@@ -21,7 +21,6 @@ Wheel::Wheel(b2World* world) {
 
     b2PolygonShape polygonShape;
     polygonShape.SetAsBox(0.5f, 1.25f);
-    //b2Fixture* fixture = body->CreateFixture(&polygonShape, 1);  //shape, density
     b2FixtureDef fixDef;
     fixDef.shape = &polygonShape;
     fixDef.density = 1.0f;
@@ -29,7 +28,6 @@ Wheel::Wheel(b2World* world) {
     ud->color = sf::Color::Black;
     fixDef.userData.pointer = reinterpret_cast<uintptr_t>(ud);
     b2Fixture* fixture = body->CreateFixture(&fixDef);  //shape, density
-
     m_currentTraction = 1;
 }
 

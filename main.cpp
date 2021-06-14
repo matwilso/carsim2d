@@ -15,17 +15,9 @@ const int H = 720, W = 1080;
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(W, H), "Car simulator");
-    sf::Font font;
-    font.loadFromFile("/usr/share/fonts/truetype/msttcorefonts/arial.ttf");
-    sf::Text text;
-    text.setFont(font);
-    text.setString("Hello world");
-    text.setCharacterSize(24);
-    text.setFillColor(sf::Color::Red);
-    text.setStyle(sf::Text::Bold | sf::Text::Underlined);
     Simulator sim;
     int controlState = 0;
-
+    // run main simulator/render loop
     while (window.isOpen()) {
         sf::Event event;
 
@@ -35,7 +27,6 @@ int main() {
                  event.key.code == sf::Keyboard::Escape))
                 window.close();
         }
-        //car.throttle = 0.0;
         controlState = 0;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
             controlState |= TDC_LEFT;
@@ -47,13 +38,9 @@ int main() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
             controlState |= TDC_DOWN;
         }
-        //window.clear();
         window.clear(sf::Color(128, 128, 128));
         sim.step(controlState, &window);
-        //car.update();
-        //car.draw(window);
-        //text.setString(to_string(car.getSpeed()));
-        window.draw(text);
+
         window.display();
         this_thread::sleep_for(10ms);
     }

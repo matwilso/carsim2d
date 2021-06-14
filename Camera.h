@@ -21,10 +21,7 @@ class Camera {
     int imageWidth = samples * upsize;
     int imageHeight = imageWidth / 2;
     sf::Texture rgbTexture;
-    sf::Texture depthTexture;
     sf::Uint8* rgbPixels;
-    sf::Uint8* depthPixels;
-    std::pair<sf::Texture, sf::Texture> capture(sf::RenderWindow*);
+    sf::Texture capture(sf::RenderWindow*);
     int totalSize();
-    sf::Uint8 buffer[64];
 };
