@@ -6,15 +6,15 @@
 #include <thread>
 
 //#include "Car.h"
+#include "Common.h"
 #include "Simulator.h"
-#include "Constants.h"
 
 using namespace std::chrono_literals;  // ns, us, ms, s, h, etc.
 using namespace std;
-const int H = 1000, W = 1000;
+const int H = 720, W = 1080;
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(H, W), "Car simulator");
+    sf::RenderWindow window(sf::VideoMode(W, H), "Car simulator");
     sf::Font font;
     font.loadFromFile("/usr/share/fonts/truetype/msttcorefonts/arial.ttf");
     sf::Text text;
@@ -48,7 +48,7 @@ int main() {
             controlState |= TDC_DOWN;
         }
         //window.clear();
-        window.clear(sf::Color::White);
+        window.clear(sf::Color(128, 128, 128));
         sim.step(controlState, &window);
         //car.update();
         //car.draw(window);

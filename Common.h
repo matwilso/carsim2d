@@ -5,9 +5,19 @@
 #define RADTODEG 57.295779513082320876f
 #endif
 
+#include <SFML/Graphics.hpp>
+
+#include "include/box2d/box2d.h"
+
 enum {
     TDC_LEFT = 0x1,
     TDC_RIGHT = 0x2,
     TDC_UP = 0x4,
     TDC_DOWN = 0x8
 };
+
+//a class to allow subclassing of different fixture user data
+struct FixtureUserData {
+    sf::Color color;
+};
+

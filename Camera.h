@@ -17,7 +17,7 @@ class Camera {
     //float fov = 0.872;
     float range = 100;
     int samples = 64;
-    int upsize = 1;
+    int upsize = 3;
     int imageWidth = samples * upsize;
     int imageHeight = imageWidth / 2;
     sf::Texture rgbTexture;

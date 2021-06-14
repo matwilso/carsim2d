@@ -7,7 +7,7 @@
 #include <iostream>
 #include <memory>
 
-#include "Constants.h"
+#include "Common.h"
 #include "Simulator.h"
 #include "include/box2d/box2d.h"
 
@@ -16,13 +16,19 @@ using namespace std;
 Wheel::Wheel(b2World* world) {
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
+    bodyDef.position = b2Vec2(10, -150);
     body = world->CreateBody(&bodyDef);
 
     b2PolygonShape polygonShape;
     polygonShape.SetAsBox(0.5f, 1.25f);
-    b2Fixture* fixture = body->CreateFixture(&polygonShape, 1);  //shape, density
-    //fixture->SetUserData(new CarTireFUD());
-    //body->SetUserData(this);
+    //b2Fixture* fixture = body->CreateFixture(&polygonShape, 1);  //shape, density
+    b2FixtureDef fixDef;
+    fixDef.shape = &polygonShape;
+    fixDef.density = 1.0f;
+    auto ud = new FixtureUserData;
+    ud->color = sf::Color::Black;
+    fixDef.userData.pointer = reinterpret_cast<uintptr_t>(ud);
+    b2Fixture* fixture = body->CreateFixture(&fixDef);  //shape, density
 
     m_currentTraction = 1;
 }
@@ -37,31 +43,6 @@ void Wheel::setCharacteristics(float maxForwardSpeed, float maxBackwardSpeed, fl
     m_maxDriveForce = maxDriveForce;
     m_maxLateralImpulse = maxLateralImpulse;
 }
-
-//void Wheel::addGroundArea(GroundAreaFUD* ga) {
-//    m_groundAreas.insert(ga);
-//    updateTraction();
-//}
-//void Wheel::removeGroundArea(GroundAreaFUD* ga) {
-//    m_groundAreas.erase(ga);
-//    updateTraction();
-//}
-//
-//void Wheel::updateTraction() {
-//    if (m_groundAreas.empty())
-//        m_currentTraction = 1;
-//    else {
-//        //find area with highest traction
-//        m_currentTraction = 0;
-//        std::set<GroundAreaFUD*>::iterator it = m_groundAreas.begin();
-//        while (it != m_groundAreas.end()) {
-//            GroundAreaFUD* ga = *it;
-//            if (ga->frictionModifier > m_currentTraction)
-//                m_currentTraction = ga->frictionModifier;
-//            ++it;
-//        }
-//    }
-//}
 
 b2Vec2 Wheel::getLateralVelocity() {
     b2Vec2 currentRightNormal = body->GetWorldVector(b2Vec2(1, 0));

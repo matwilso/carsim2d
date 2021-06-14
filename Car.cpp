@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include "Constants.h"
+#include "Common.h"
 #include "include/box2d/box2d.h"
 using namespace std;
 
@@ -13,21 +13,31 @@ Car::Car(b2World* world) {
     //create car body
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
+    bodyDef.position = b2Vec2(10, -150);
     body = world->CreateBody(&bodyDef);
     body->SetAngularDamping(3);
 
-    b2Vec2 vertices[8];
-    vertices[0].Set(1.5, 0);
-    vertices[1].Set(3, 2.5);
-    vertices[2].Set(2.8, 5.5);
-    vertices[3].Set(1, 10);
-    vertices[4].Set(-1, 10);
-    vertices[5].Set(-2.8, 5.5);
-    vertices[6].Set(-3, 2.5);
-    vertices[7].Set(-1.5, 0);
+    b2Vec2 vertices[6];
+    vertices[0].Set(2, 0);
+    vertices[1].Set(2, 2.5);
+    vertices[2].Set(1.5, 10);
+    vertices[3].Set(-1.5, 10);
+    vertices[4].Set(-2, 2.5);
+    vertices[5].Set(-2, 0);
     b2PolygonShape polygonShape;
-    polygonShape.Set(vertices, 8);
-    b2Fixture* fixture = body->CreateFixture(&polygonShape, 0.1f);  //shape, density
+    polygonShape.Set(vertices, 6);
+
+    b2FixtureDef fixDef;
+    fixDef.shape = &polygonShape;
+    fixDef.density = 0.1f;
+    //fixDef.userData = FixtureUserData(sf::Color::Black);
+    auto ud = new FixtureUserData;
+    ud->color = sf::Color::Red;
+    fixDef.userData.pointer = reinterpret_cast<uintptr_t>(ud);
+    //b2Fixture* fixture = body->CreateFixture(&fixDef);  //shape, density
+
+    b2Fixture* fixture = body->CreateFixture(&fixDef);  //shape, density
+    //b2Fixture* fixture = body->CreateFixture(&polygonShape, 0.1f);  //shape, density
 
     //prepare common joint parameters
     b2RevoluteJointDef jointDef;
@@ -38,7 +48,7 @@ Car::Car(b2World* world) {
     jointDef.localAnchorB.SetZero();  //center of tire
 
     float maxForwardSpeed = 250;
-    float maxBackwardSpeed = -40;
+    float maxBackwardSpeed = -100;
     float backTireMaxDriveForce = 300;
     float frontTireMaxDriveForce = 500;
     float backTireMaxLateralImpulse = 8.5;
