@@ -2,7 +2,7 @@
 
 Simple top-down 2D car simulator made in C++ using box2D for physics and SFML for rendering.
 
-The purpose of this project is to dust off my C++ knowledge and practice developing a Software 1.0 simulator to [better understand](https://en.wikipedia.org/wiki/Wikipedia:Chesterton's_fence) the principles.
+This was a weekend project is to dust off my C++ knowledge and practice developing a Software 1.0 simulator to [better understand](https://en.wikipedia.org/wiki/Wikipedia:Chesterton's_fence) the principles.
 
 It is pretty barebones, so don't get that excited.
 
