@@ -19,7 +19,7 @@ https://user-images.githubusercontent.com/19582683/121852796-38d7b000-ccad-11eb-
 
 For the initial car physics: http://www.iforce2d.net/b2dtut/top-down-car
 
-For vision sensor, I use box2d's ray-tracing to create a RGB image which drops off with depth. The idea is loosely based off: https://andyljones.com/megastep/
+For vision sensor, I use box2d's ray-tracing to create a 1D RGB image which drops off with depth. The idea is loosely based off: https://andyljones.com/megastep/
 
 
 ## TODO
