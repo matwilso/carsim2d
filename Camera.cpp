@@ -13,13 +13,9 @@
 
 using namespace std;
 
-Camera::Camera(string name, b2Body* body, b2Vec2 offset, float angle) {
+Camera::Camera(string name, b2Body* body, b2Vec2 offset, float angle) : name{name}, body{body}, offset{offset}, angle{angle} {
     rgbTexture.create(imageWidth, imageHeight);
     rgbPixels = new sf::Uint8[totalSize()];
-    this->name = name;
-    this->body = body;
-    this->offset = offset;
-    this->angle = angle;
 }
 
 int Camera::totalSize() {
@@ -34,13 +30,11 @@ class RayCallback : public b2RayCastCallback {
     int idx;
     sf::Uint8 depthBuffer[64];
     sf::Color rgbBuffer[64];
-    RayCallback(string name, sf::RenderWindow* window) {
+    RayCallback(string name, sf::RenderWindow* window) : name{name}, window{window} {
         fill_n(depthBuffer, 64, 0);
         for (auto i = 0; i < 64; i++) {
             rgbBuffer[i] = sf::Color::Black;
         }
-        this->name = name;
-        this->window = window;
     }
     float ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float fraction) override {
         sf::Vertex line[] =
