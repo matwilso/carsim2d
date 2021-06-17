@@ -17,6 +17,5 @@ class Simulator {
     b2World* world;
     Car* car;
     Camera* frontCam;
-    Camera* rightCam;
     b2Body* edge;
 };

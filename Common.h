@@ -5,9 +5,8 @@
 #define RADTODEG 57.295779513082320876f
 #endif
 
-#include <SFML/Graphics.hpp>
-
-#include "include/box2d/box2d.h"
+//#include <SFML/Graphics.hpp>
+class sf::Color;
 
 enum {
     TDC_LEFT = 0x1,

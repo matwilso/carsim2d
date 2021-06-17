@@ -6,9 +6,7 @@
 #include <exception>
 #include <iostream>
 #include <memory>
-
 #include "Common.h"
-#include "Simulator.h"
 #include "include/box2d/box2d.h"
 
 using namespace std;

@@ -1,11 +1,9 @@
-
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include <iostream>
 #include <string>
 #include <thread>
 
-//#include "Car.h"
 #include "Common.h"
 #include "Simulator.h"
 

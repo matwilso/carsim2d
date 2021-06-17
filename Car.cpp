@@ -30,14 +30,10 @@ Car::Car(b2World* world) {
     b2FixtureDef fixDef;
     fixDef.shape = &polygonShape;
     fixDef.density = 0.1f;
-    //fixDef.userData = FixtureUserData(sf::Color::Black);
     auto ud = new FixtureUserData;
     ud->color = sf::Color::Red;
     fixDef.userData.pointer = reinterpret_cast<uintptr_t>(ud);
-    //b2Fixture* fixture = body->CreateFixture(&fixDef);  //shape, density
-
     b2Fixture* fixture = body->CreateFixture(&fixDef);  //shape, density
-    //b2Fixture* fixture = body->CreateFixture(&polygonShape, 0.1f);  //shape, density
 
     //prepare common joint parameters
     b2RevoluteJointDef jointDef;

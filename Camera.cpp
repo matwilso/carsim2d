@@ -1,8 +1,6 @@
 
 #include "Camera.h"
-
 #include <math.h>
-
 #include <algorithm>
 #include <exception>
 #include <iostream>
@@ -15,11 +13,7 @@ using namespace std;
 
 Camera::Camera(string name, b2Body* body, b2Vec2 offset, float angle) : name{name}, body{body}, offset{offset}, angle{angle} {
     rgbTexture.create(imageWidth, imageHeight);
-    rgbPixels = new sf::Uint8[totalSize()];
-}
-
-int Camera::totalSize() {
-    return imageWidth * (imageHeight)*4;
+    rgbPixels = new sf::Uint8[imageWidth * imageHeight * 4];
 }
 
 class RayCallback : public b2RayCastCallback {

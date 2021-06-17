@@ -1,8 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <string>
-#include <utility>
-
 #include "Camera.h"
 #include "include/box2d/box2d.h"
 
@@ -23,5 +21,4 @@ class Camera {
     sf::Texture rgbTexture;
     sf::Uint8* rgbPixels;
     sf::Texture capture(sf::RenderWindow*);
-    int totalSize();
 };

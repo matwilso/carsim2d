@@ -14,10 +14,7 @@ using namespace std;
 
 namespace render {
 void fixture(b2Fixture* fix, sf::RenderWindow* window) {
-    auto ud = (FixtureUserData*)fix->GetUserData().pointer;
-    //ud.pointer
-    //auto x = (FixtureUserData*)ud.pointer;
-    //FixtureUserData* ud = dynamic_cast<FixtureUserData*>(&(fix->GetUserData()));
+    auto userData = (FixtureUserData*)fix->GetUserData().pointer;
 
     if (auto shape = dynamic_cast<b2PolygonShape*>(fix->GetShape())) {
         auto trans = fix->GetBody()->GetTransform();
@@ -29,16 +26,14 @@ void fixture(b2Fixture* fix, sf::RenderWindow* window) {
             sf::Vector2f arr(5.0 * vert.x, -5.0 * vert.y);
             convex.setPoint(i, arr);
         }
-        convex.setFillColor(ud->color);
+        convex.setFillColor(userData->color);
         window->draw(convex);
     } else if (auto shape = dynamic_cast<b2EdgeShape*>(fix->GetShape())) {
-        //cout << "LINE" << endl;
-        /// TODO: go through the effort of adding thickness to this.
         auto trans = fix->GetBody()->GetTransform();
         sf::Vertex line[] =
             {
-                sf::Vertex(sf::Vector2f(5.0 * shape->m_vertex1.x, -5.0 * shape->m_vertex1.y), ud->color),
-                sf::Vertex(sf::Vector2f(5.0 * shape->m_vertex2.x, -5.0 * shape->m_vertex2.y), ud->color),
+                sf::Vertex(sf::Vector2f(5.0 * shape->m_vertex1.x, -5.0 * shape->m_vertex1.y), userData->color),
+                sf::Vertex(sf::Vector2f(5.0 * shape->m_vertex2.x, -5.0 * shape->m_vertex2.y), userData->color),
             };
         window->draw(line, 2, sf::Lines);
     }
@@ -93,9 +88,9 @@ Simulator::Simulator() {
         arr[2] = b2Vec2(x + 1, y2);
         arr[3] = b2Vec2(x + 1, y1);
         edgeShape.Set(arr, 4);
-        auto ud = new FixtureUserData;
-        ud->color = color;
-        fixDef.userData.pointer = reinterpret_cast<uintptr_t>(ud);
+        auto userData = new FixtureUserData;
+        userData->color = color;
+        fixDef.userData.pointer = reinterpret_cast<uintptr_t>(userData);
         edge->CreateFixture(&fixDef);
     };
     auto buildHLine = [&](float x1, float x2, float y, sf::Color color) {
@@ -105,9 +100,9 @@ Simulator::Simulator() {
         arr[2] = b2Vec2(x2, y + 1);
         arr[3] = b2Vec2(x1, y + 1);
         edgeShape.Set(arr, 4);
-        auto ud = new FixtureUserData;
-        ud->color = color;
-        fixDef.userData.pointer = reinterpret_cast<uintptr_t>(ud);
+        auto userData = new FixtureUserData;
+        userData->color = color;
+        fixDef.userData.pointer = reinterpret_cast<uintptr_t>(userData);
         edge->CreateFixture(&fixDef);
     };
     buildHLine(30.0f, 100.0f, -50.0f, sf::Color::Yellow);
