@@ -15,9 +15,6 @@ using namespace std;
 namespace render {
 void fixture(b2Fixture* fix, sf::RenderWindow* window) {
     auto ud = (FixtureUserData*)fix->GetUserData().pointer;
-    //ud.pointer
-    //auto x = (FixtureUserData*)ud.pointer;
-    //FixtureUserData* ud = dynamic_cast<FixtureUserData*>(&(fix->GetUserData()));
 
     if (auto shape = dynamic_cast<b2PolygonShape*>(fix->GetShape())) {
         auto trans = fix->GetBody()->GetTransform();
@@ -32,7 +29,6 @@ void fixture(b2Fixture* fix, sf::RenderWindow* window) {
         convex.setFillColor(ud->color);
         window->draw(convex);
     } else if (auto shape = dynamic_cast<b2EdgeShape*>(fix->GetShape())) {
-        //cout << "LINE" << endl;
         /// TODO: go through the effort of adding thickness to this.
         auto trans = fix->GetBody()->GetTransform();
         sf::Vertex line[] =
@@ -43,7 +39,6 @@ void fixture(b2Fixture* fix, sf::RenderWindow* window) {
         window->draw(line, 2, sf::Lines);
     }
 }
-
 void shape(b2Body* body, sf::RenderWindow* window) {
     auto fix = body->GetFixtureList();
     for (b2Fixture* fix = body->GetFixtureList(); fix; fix = fix->GetNext())
@@ -136,6 +131,11 @@ void Simulator::step(int controlState, sf::RenderWindow* window) {
     rgbSprite.setTexture(data);
     rgbSprite.setPosition(800, 10);
     window->draw(rgbSprite);
+
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+        sf::Vector2i localPosition = sf::Mouse::getPosition(*window); // window is a sf::Window
+        cout << "mouse: " << localPosition.x << " " << localPosition.y << endl;
+    }
 }
 
 Simulator::~Simulator() {

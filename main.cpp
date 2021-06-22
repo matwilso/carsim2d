@@ -32,12 +32,10 @@ int main() {
             controlState |= TDC_LEFT;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
             controlState |= TDC_RIGHT;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
             controlState |= TDC_UP;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
             controlState |= TDC_DOWN;
-        }
         window.clear(sf::Color(128, 128, 128));
         sim.step(controlState, &window);
 
@@ -46,3 +44,4 @@ int main() {
     }
     return 0;
 }
+
